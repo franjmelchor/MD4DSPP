@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Contract" nsURI="https://www.example.org/contract" nsPrefix="Contract">
+  <eClassifiers xsi:type="ecore:EClass" name="Contract" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//ContractType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="in" lowerBound="1" upperBound="-1"
+        eType="#//Object" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="out" upperBound="-1" eType="#//Object"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ContractType">
+    <eLiterals name="PRECONDITION"/>
+    <eLiterals name="POSTCONDITION" value="1"/>
+    <eLiterals name="INVARIANT" value="2" literal="INVARIANT"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Condition" eSuperTypes="#//Contract">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conditionDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//ConditionDef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="if" lowerBound="1" upperBound="-1"
+        eType="#//If" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="then" lowerBound="1" upperBound="-1"
+        eType="#//Then" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Range" abstract="true" eSuperTypes="#//Contract">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="belongOp" eType="#//BelongOp"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="BelongOp">
+    <eLiterals name="BELONG"/>
+    <eLiterals name="NOTBELONG" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="If">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ifDefinition" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//IfDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="belongOp" eType="#//BelongOp"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="then" lowerBound="1" eType="#//Then"
+        eOpposite="#//Then/if"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueCondition" lowerBound="1"
+        upperBound="-1" eType="#//Value" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Then">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="thenDefinition" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//ThenDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="if" lowerBound="1" eType="#//If"
+        eOpposite="#//If/then"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueResult" lowerBound="1"
+        eType="#//Value" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="belongOp" eType="#//BelongOp"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ValueRange" eSuperTypes="#//Range">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" lowerBound="1" upperBound="-1"
+        eType="#//Value" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueRangeDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//ValueRangeDefinition"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FieldRange" eSuperTypes="#//Range">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fieldRangeDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//FieldRangeDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" upperBound="-1"
+        eType="#//Field" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Object" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DataDictionary" eSuperTypes="#//Object">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataDictionary" lowerBound="1"
+        eType="ecore:EClass Workflow.ecore#//DataDictionary"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataDictionaryDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//DataDictionaryDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataField" eSuperTypes="#//Object">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataField" lowerBound="1"
+        eType="ecore:EClass Workflow.ecore#//DataField"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataFieldDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//DataFieldDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Value" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="quantity" eType="#//Quantity"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FixValue" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueFieldDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//FixValueDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dataType" eType="#//DataType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Interval" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="leftMargin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rightMargin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="closureType" eType="#//ClosureType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="intervalDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//IntervalDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ClosureType">
+    <eLiterals name="openOpen"/>
+    <eLiterals name="openClosed" value="1"/>
+    <eLiterals name="closedOpen" value="2"/>
+    <eLiterals name="closedClosed" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Quantity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operator" eType="#//Operator"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Operator">
+    <eLiterals name="greatherEqual"/>
+    <eLiterals name="greather" value="1"/>
+    <eLiterals name="lessEqual" value="2"/>
+    <eLiterals name="less" value="3"/>
+    <eLiterals name="equal" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Percent" eSuperTypes="#//Quantity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="percentDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//PercentDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="percent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbsoluteValue" eSuperTypes="#//Quantity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="absoluteValueDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//AbsoluteValueDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Field">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataField" lowerBound="1"
+        eType="ecore:EClass Workflow.ecore#//DataField"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DataType">
+    <eLiterals name="String"/>
+    <eLiterals name="Time" value="1"/>
+    <eLiterals name="Integer" value="2"/>
+    <eLiterals name="DateTime" value="3"/>
+    <eLiterals name="Boolean" value="4"/>
+    <eLiterals name="Double" value="5"/>
+    <eLiterals name="Float" value="6"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DerivedValue" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//DerivedType"
+        defaultValueLiteral="MostFrequent"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="derivedValueDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//DerivedValueDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NumOp" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operation" eType="#//Operation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="numOpDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//NumOpDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DerivedType">
+    <eLiterals name="MostFrequent"/>
+    <eLiterals name="Previous" value="1"/>
+    <eLiterals name="Next" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Operation">
+    <eLiterals name="Interpolation"/>
+    <eLiterals name="Mean" value="1"/>
+    <eLiterals name="Median" value="2"/>
+    <eLiterals name="Closest" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SpecialType">
+    <eLiterals name="MISSING"/>
+    <eLiterals name="INVALID" value="1"/>
+    <eLiterals name="OUTLIER" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SpecialValue" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="specialType" eType="#//SpecialType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="specialValueDef" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//SpecialValueDef"/>
+  </eClassifiers>
+</ecore:EPackage>

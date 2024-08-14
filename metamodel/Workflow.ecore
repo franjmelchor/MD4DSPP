@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Workflow" nsURI="https://www.example.org/workflow" nsPrefix="Workflow">
+  <eClassifiers xsi:type="ecore:EClass" name="Workflow">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataprocessing" lowerBound="1"
+        upperBound="-1" eType="#//DataProcessing" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="link" upperBound="-1" eType="#//Link"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataProcessing">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outgoing" eType="#//Link"
+        eOpposite="#//Link/source"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="incoming" eType="#//Link"
+        eOpposite="#//Link/target"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataProcessingDefinition"
+        lowerBound="1" eType="ecore:EClass Library.ecore#//DataProcessingDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameter" upperBound="-1"
+        eType="#//Parameter" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contract" upperBound="-1"
+        eType="#//Contract" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="inputPort" lowerBound="1"
+        upperBound="-1" eType="#//DataDictionary" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outputPort" lowerBound="1"
+        upperBound="-1" eType="#//DataDictionary" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="in" lowerBound="1" upperBound="-1"
+        eType="#//Argument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="out" lowerBound="1" upperBound="-1"
+        eType="#//Argument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Link">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" lowerBound="1"
+        eType="#//DataProcessing" eOpposite="#//DataProcessing/outgoing"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" lowerBound="1"
+        eType="#//DataProcessing" eOpposite="#//DataProcessing/incoming"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Parameter" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Map" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="inValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="outvalue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="mapDefinition" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//MapDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Primitive" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="primitiveDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//PrimitiveDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DerivedField" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="derivedFieldDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//DerivedFieldDef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="der_dataField" lowerBound="1"
+        eType="#//DataField"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FilterValue" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="filterValueDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//FilterValueDef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="primitive" upperBound="-1"
+        eType="#//Primitive"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="matchingvalue" upperBound="-1"
+        eType="#//MatchingValue"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filterType" eType="#//FilterType"
+        defaultValueLiteral="EXCLUDE"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MatchingValue" abstract="true" eSuperTypes="#//Parameter"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Range" eSuperTypes="#//MatchingValue">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rangeDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//RangeDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="min" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="clousure" eType="#//ClosureType"
+        defaultValueLiteral="closedClosed"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minInfinity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxInfinity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SpecialValues" eSuperTypes="#//MatchingValue">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="specialValuesDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//MissingValuesDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="specialType" eType="#//SpecialValue"
+        defaultValueLiteral="Missing"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DiscretizeBin" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="discretizeBinDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//DiscretizeBinDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="binValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="interval" lowerBound="1"
+        upperBound="-1" eType="#//Interval" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataDictionary" eSuperTypes="#//Argument">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datafield" upperBound="-1"
+        eType="#//DataField" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataDictionaryDefinition"
+        lowerBound="1" eType="ecore:EClass Library.ecore#//DataDictionaryDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="path" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="columnDelimiter" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral=","/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataField" abstract="true" eSuperTypes="#//Argument">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dataType" eType="#//DataType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="target" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="validValues" upperBound="-1"
+        eType="#//ValueField" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="invalidValues" upperBound="-1"
+        eType="#//ValueField" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="missingValues" upperBound="-1"
+        eType="#//ValueField" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="displayName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="in" eType="#//DataField"
+        eOpposite="#//DataField/out"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="out" eType="#//DataField"
+        eOpposite="#//DataField/in"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Categorical" eSuperTypes="#//DataField">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="categoricalDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//CategoricalDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ordinal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Continuous" eSuperTypes="#//DataField">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="continuousDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//ContinuousDef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="interval" lowerBound="1"
+        upperBound="-1" eType="#//Interval" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Interval">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="leftMargin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rightMargin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="clousure" eType="#//ClosureType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Contract">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contractDefinition" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//ContractDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contract" lowerBound="1"
+        eType="ecore:EClass Contract.ecore#//Contract" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Argument" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="DataType">
+    <eLiterals name="String" literal="String"/>
+    <eLiterals name="Time" value="1"/>
+    <eLiterals name="Integer" value="2"/>
+    <eLiterals name="DateTime" value="3"/>
+    <eLiterals name="Boolean" value="4"/>
+    <eLiterals name="Double" value="5"/>
+    <eLiterals name="Float" value="6"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ClosureType">
+    <eLiterals name="opeOpen"/>
+    <eLiterals name="openClosed" value="1"/>
+    <eLiterals name="closedOpen" value="2"/>
+    <eLiterals name="closedClosed" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ImputeType" abstract="true" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="imputeValue" eType="#//SpecialValue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CastType" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="castTypeDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//CastTypeDef"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//DataType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DerivedValue" eSuperTypes="#//ImputeType">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//DerivedType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="derivedValueDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//DerivedValueDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NumOp" eSuperTypes="#//ImputeType">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operation" eType="#//Operation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="numOpDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//NumOpDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FixValue" eSuperTypes="#//ImputeType">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fixValueDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//FixValueDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Operation">
+    <eLiterals name="Interpolation"/>
+    <eLiterals name="Mean" value="1"/>
+    <eLiterals name="Median" value="2"/>
+    <eLiterals name="Closest" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DerivedType">
+    <eLiterals name="MostFrequent"/>
+    <eLiterals name="Previous" value="1"/>
+    <eLiterals name="Next" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ValueField">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="count" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SpecialValue">
+    <eLiterals name="Missing"/>
+    <eLiterals name="Invalid" value="1"/>
+    <eLiterals name="Outlier" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Field" eSuperTypes="#//Parameter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fieldDef" lowerBound="1"
+        eType="ecore:EClass Library.ecore#//FieldDef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataField" lowerBound="1"
+        upperBound="-1" eType="#//DataField"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operator" eType="#//Operator"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Operator">
+    <eLiterals name="BELONG"/>
+    <eLiterals name="NOTBELONG" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="FilterType">
+    <eLiterals name="EXCLUDE"/>
+    <eLiterals name="INCLUDE" value="1"/>
+  </eClassifiers>
+</ecore:EPackage>

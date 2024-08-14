@@ -1,0 +1,874 @@
+[comment encoding = UTF-8 /]
+[**
+ * The documentation of the module generate.
+ */]
+[module generate('https://www.example.org/contract', 'https://www.example.org/workflow')]
+
+
+[template public generateCallContract(aContract : Contract)]
+[if (aContract._in.oclIsTypeOf(DataField))]																			[comment OPEN checks that the contract data input is a DataField/]
+	[let df : DataField = aContract._in.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+[comment]The contracts below are of type FieldRange[/comment]
+		[if (aContract.oclIsTypeOf(FieldRange))]																	[comment OPEN checks that the contract is of type FieldRange (usually a Pre or Post condition)/]
+			[let fr : FieldRange = aContract.oclAsType(FieldRange)]													[comment OPEN assigns the variable to be of type FieldRange/]
+field_list_[fr.fieldRangeDef.name/]=['['/][for (field : Field | fr.field) separator(', ')]'[field.dataField.displayName/]'[/for][']'/]
+if contract_pre_post.check_field_range(fields=field_list_[fr.fieldRangeDef.name/],
+							data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							belong_op=Belong([if (fr.belongOp=BelongOp::BELONG)]0[else]1[/if])):
+	print('[aContract.type/] call returned TRUE')
+else:
+	print('[aContract.type/] call returned FALSE')
+			[/let]																									[comment CLOSE assigns the variable to be of type FieldRange/]
+		[/if]																										[comment CLOSE checks that the contract is of type FieldRange (usually a Pre or Post condition)/]
+[comment]The contracts below are of type ValueRange[/comment]
+		[if (aContract.oclIsTypeOf(ValueRange))]																	[comment OPEN checks that the contract is of type ValueRange (usually a Pre or Post condition)/]
+			[let vr : ValueRange = aContract.oclAsType(ValueRange)]													[comment OPEN assigns the variable to be of type ValueRange/]
+				[for (v : Value | vr.value)]																		[comment OPEN traverse all the values in the contract to know which pre-post contract call/]
+					[if (v.oclIsTypeOf(FixValue))]																	[comment OPEN checks that the value to check is a FixValue/]
+						[let fv : FixValue = v.oclAsType(FixValue)]													[comment OPEN assigns the variable to be of type FixValue/]
+							[if (v.quantity <> null)]																[comment OPEN checks that the quantity is not null (there is an operator and a quant)/]
+								[if(v.quantity.oclIsTypeOf(AbsoluteValue))]											[comment OPEN checks that the quantity is of type Absolute/]
+									[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]					[comment OPEN assigns the variable to be of type Absolute/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field='[df.dataField.displayName/]',
+								quant_abs=[av.value/], quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[/let]																			[comment CLOSE assigns the variable to be of type Absolute/]
+								[elseif (v.quantity.oclIsTypeOf(Percent))]											[comment OPEN checks that the quantity is of type Percent/]
+									[let per : Percent = v.quantity.oclAsType(Percent)]								[comment OPEN assigns the variable to be of type Percent/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field='[df.dataField.displayName/]',
+								quant_rel=[per.percent/], quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[/let]																			[comment CLOSE assigns the variable to be of type Percent/]
+								[/if]																				[comment CLOSE checks that the quantity is of type Absolute or Percent/]
+							[else]																					[comment OPEN checks that the quantity not null (there are not operators or quants)/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field='[df.dataField.displayName/]',
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+							[/if]																					[comment CLOSE checks that the quantity is not null (there are not operators or quants)/]
+						[/let]																						[comment CLOSE assigns the variable to be of type FixValue/]
+					[elseif (v.oclIsTypeOf(Interval))]																[comment OPEN checks that the variable is of type Interval/]
+						[let inter : Interval = v.oclAsType(Interval)]												[comment OPEN assigns the variable to be of type Interval/]
+if contract_pre_post.check_interval_range_float(left_margin=[inter.leftMargin/], right_margin=[inter.rightMargin/], data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+                                	closure_type=Closure([if (inter.closureType=ClosureType::openOpen)]0[elseif (inter.closureType=ClosureType::openClosed)]1[elseif (inter.closureType=ClosureType::closedOpen)]2[elseif (inter.closureType=ClosureType::closedClosed)]3[/if]), belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field='[df.dataField.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+						[/let]																						[comment CLOSE assigns the variable to be of type Interval/]
+					[elseif (v.oclIsTypeOf(SpecialValue))]															[comment OPEN checks that the variable is of type SpecialValue/]
+						[let sv : SpecialValue = v.oclAsType(SpecialValue)]											[comment OPEN assigns the variable to be of type SpecialValue/]
+							[if (v.quantity <> null)]																[comment OPEN checks that the quantity is not null (there are not operators or quants)/]
+								[if (sv.specialType=SpecialType::MISSING)]											[comment OPEN checks that the SpecialType is MISSING/]
+missing_values_[vr.valueRangeDef.name/]=['['/][if (vr._in.oclIsTypeOf(DataField))][let df : DataField = vr._in.oclAsType(DataField)][for (mv : ValueField | df.dataField.missingValues) separator(', ')][if (df.dataField.dataType=DataType::String or df.dataField.dataType=DataType::Time or df.dataField.dataType=DataType::DateTime)]'[mv.value/]'[else][mv.value/][/if][/for][/let][']'/][/if]
+									[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks that the quantity is Absolute/]
+										[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the variable to be of type AbsoluteValue/]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																		[comment CLOSE assigns the variable to be of type AbsoluteValue/]
+									[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks that the quantity is Percent/]
+										[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the variable to be of type Percent/]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																		[comment CLOSE assigns the variable to be of type Percent/]
+									[/if]																			[comment CLOSE checks that the quantity is AbsoluteValue or Percent/]
+								[elseif (sv.specialType=SpecialType::INVALID)]										[comment OPEN checks that the SpecialType is INVALID/]
+invalid_values_[vr.valueRangeDef.name/]=['['/][if (vr._in.oclIsTypeOf(DataField))][let df : DataField = vr._in.oclAsType(DataField)][for (mv : ValueField | df.dataField.invalidValues) separator(', ')][mv.value/][/for][/let][']'/][/if]
+									[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks that the quantity is AbsoluteValue/]
+										[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the variable to be of type AbsoluteValue/]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																		[comment CLOSE assigns the variable to be of type AbsoluteValue/]
+									[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks that the quantity is Percent/]
+										[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the variable to be of type Percent/]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																		[comment CLOSE assigns the variable to be of type AbsoluteValue/]
+									[/if]																			[comment CLOSE checks that the quantity is AbsoluteValue or Percent/]
+								[elseif (sv.specialType=SpecialType::OUTLIER)]										[comment OPEN checks that the SpecialType is OUTLIER/]
+									[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks that the quantity is AbsoluteValue/]
+										[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the variable to be of type AbsoluteValue/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																		[comment CLOSE assigns the variable to be of type AbsoluteValue/]
+									[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks that the quantity is Percent/]
+										[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the variable to be of type Percent/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																		[comment CLOSE assigns the variable to be of type Percent/]
+									[/if]																			[comment CLOSE checks that the quantity is AbsoluteValue or Percent/]
+								[/if]																				[comment CLOSE checks that the SpecialType is MISSING, INVALID or OUTLIER/]
+							[elseif (v.quantity = null)]															[comment OPEN checks that the quantity is null/]
+								[if (sv.specialType=SpecialType::MISSING)]											[comment OPEN checks that the SpecialType is MISSING/]
+missing_values_[vr.valueRangeDef.name/]=['['/][if (vr._in.oclIsTypeOf(DataField))][let df : DataField = vr._in.oclAsType(DataField)][for (mv : ValueField | df.dataField.missingValues) separator(', ')][if (df.dataField.dataType=DataType::String or df.dataField.dataType=DataType::Time or df.dataField.dataType=DataType::DateTime)]'[mv.value/]'[else][mv.value/][/if][/for][/let][']'/][/if]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+								[elseif (sv.specialType=SpecialType::INVALID)]										[comment OPEN checks that the SpecialType is INVALID/]
+invalid_values_[vr.valueRangeDef.name/]=['['/][if (vr._in.oclIsTypeOf(DataField))][let df : DataField = vr._in.oclAsType(DataField)][for (mv : ValueField | df.dataField.invalidValues) separator(', ')][mv.value/][/for][/let][']'/][/if]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+								[elseif (sv.specialType=SpecialType::OUTLIER)]										[comment OPEN checks that the SpecialType is OUTLIER/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/], field='[df.dataField.displayName/]', 
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+								[/if]																				[comment CLOSE checks that the SpecialType is MISSING, INVALID or OUTLIER/]
+							[/if]																					[comment CLOSE checks that the quantity is not null (there are not operators or quants)/]
+						[/let]																						[comment CLOSE assigns the variable to be of type SpecialValue/]
+					[/if]																							[comment CLOSE checks that the quantity is null or not null/]
+				[/for]																								[comment CLOSE traverse all the values in the contract to know which pre-post contract call/]
+			[/let]																									[comment CLOSE assigns the variable to be of type ValueRange/]
+		[elseif (aContract.oclIsTypeOf(Condition))]																	[comment OPEN Contracts of type Condition (Invariants)/]
+[generateCallConditionContract(aContract)/]
+		[/if]																										[comment CLOSE aContract.oclIsTypeOf()/]
+	[/let]																											[comment CLOSE assigns the variable to be of type DataField/]
+[elseif (aContract._in.oclIsTypeOf(DataDictionary))]																[comment OPEN assigns the variable to be of type DataDictionary/]
+[generateCallDataDicContract(aContract)/]
+[/if]																												[comment CLOSE assigns the variable to be of type DataField or DataDictionary/]
+[/template]
+
+
+[template public generateCallDataDicContract(aContract : Contract)] 		[comment IT IS THE SAME AS generateCallContract(aContract : Contract) but the data input to the contract is a DataDictionary instead of a DataField/]
+[let dd : DataDictionary = aContract._in.oclAsType(DataDictionary)]														[comment OPEN assigns the input in the contract to be of type DataDictionary/]
+[comment]The contracts below are of type FieldRange[/comment]
+	[if (aContract.oclIsTypeOf(FieldRange))]																			[comment OPEN checks that the contract is of type FieldRange/]
+		[let fr : FieldRange = aContract.oclAsType(FieldRange)]															[comment OPEN assigns the variable to be of type FieldRange/]
+			[if (aContract.type=ContractType::PRECONDITION)]															[comment OPEN checks if it is a Precondition/]					
+				[for (dd_in : Workflow::DataDictionary | aContract.eContainer(Workflow::DataProcessing).inputPort)]		[comment OPEN traverse all the input DataDictionaries/]
+field_list_[fr.fieldRangeDef.name/]=['['/][for (field : Field | fr.field) separator(', ')]'[field.dataField.displayName/]'[/for][']'/]
+if contract_pre_post.check_field_range(fields=field_list_[fr.fieldRangeDef.name/],
+							data_dictionary=[dd_in.dataDictionaryDefinition.name/],
+							belong_op=Belong([if (fr.belongOp=BelongOp::BELONG)]0[else]1[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+				[/for]																									[comment CLOSE traverse all the input DataDictionaries/]
+			[elseif (aContract.type=ContractType::POSTCONDITION)]														[comment OPEN checks if it is a Postcondition/]
+				[for (dd_out : Workflow::DataDictionary | aContract.eContainer(Workflow::DataProcessing).outputPort)]	[comment OPEN traverse all the output DataDictionaries/]
+field_list_[fr.fieldRangeDef.name/]=['['/][for (field : Field | fr.field) separator(', ')]'[field.dataField.displayName/]'[/for][']'/]
+if contract_pre_post.check_field_range(fields=field_list_[fr.fieldRangeDef.name/],
+							data_dictionary=[dd_out.dataDictionaryDefinition.name/],
+							belong_op=Belong([if (fr.belongOp=BelongOp::BELONG)]0[else]1[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+				[/for]																									[comment CLOSE traverse all the output DataDictionaries/]
+			[/if]																										[comment CLOSE checks if it is a Precondition or a Postcondition/]
+		[/let]																											[comment CLOSE assigns the variable to be of type FieldRange/]
+	[/if]																												[comment CLOSE checks that the contract is of type FieldRange/]
+	[if (aContract.oclIsTypeOf(ValueRange))]																			[comment OPEN checks if the contract is a ValueRange/]
+		[let vr : ValueRange = aContract.oclAsType(ValueRange)]															[comment OPEN assigns the contract to be a ValueRange/]
+			[if (aContract.type=ContractType::PRECONDITION)]															[comment OPEN checks if it is a Precondition/]
+				[for (dd_in : Workflow::DataDictionary | aContract.eContainer(Workflow::DataProcessing).inputPort)]		[comment OPEN traverse all the input DataDictionaries/]
+					[for (v : Value | vr.value)]																		[comment OPEN traverse all the parameters/]
+						[if (v.oclIsTypeOf(FixValue))]																	[comment OPEN checks if the parameter is a FixValue/]
+							[let fv : FixValue = v.oclAsType(FixValue)]													[comment OPEN assigns the parameter to be a FixValue/]
+								[if (v.quantity <> null)]																[comment OPEN checks if the quantity is not null/]
+									[if(v.quantity.oclIsTypeOf(AbsoluteValue))]											[comment OPEN checks if the quantity is an AbsoluteValue/]
+										[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]					[comment OPEN assigns the variable to be an AbsoluteValue/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[dd_in.dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field=None,
+								quant_abs=[av.value/], quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																			[comment CLOSE assigns the variable to be an AbsoluteValue/]
+									[elseif (v.quantity.oclIsTypeOf(Percent))]											[comment OPEN checks if the quantity is a Percent/]
+										[let per : Percent = v.quantity.oclAsType(Percent)]								[comment OPEN assigns the variable to be a Percent/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[dd_in.dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field=None,
+								quant_rel=[per.percent/], quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																			[comment CLOSE assigns the variable to be a Percent/]
+									[/if]																				[comment CLOSE checks if the quantity is an AbsoluteValue or a Percent/]
+								[else]																					[comment OPEN checks if the quantity is null/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[dd_in.dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field=None,
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+								[/if]																					[comment CLOSE checks if the quantity is null/]
+							[/let]																						[comment CLOSE assigns the parameter to be a FixValue/]
+						[elseif (v.oclIsTypeOf(Interval))]																[comment OPEN checks if the parameter is an interval/]
+							[let inter : Interval = v.oclAsType(Interval)]												[comment OPEN assigns the variable to be an interval/]
+if contract_pre_post.check_interval_range_float(left_margin=[inter.leftMargin/], right_margin=[inter.rightMargin/], data_dictionary=[dd_in.dataDictionaryDefinition.name/],
+                               closure_type=Closure([if (inter.closureType=ClosureType::openOpen)]0[elseif (inter.closureType=ClosureType::openClosed)]1[elseif (inter.closureType=ClosureType::closedOpen)]2[elseif (inter.closureType=ClosureType::closedClosed)]3[/if]), belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+							[/let]																						[comment CLOSE assigns the variable to be an interval/]
+						[elseif (v.oclIsTypeOf(SpecialValue))]															[comment OPEN checks if the parameter is a SpecialValue/]
+							[let sv : SpecialValue = v.oclAsType(SpecialValue)]											[comment OPEN assigns the variable to be a SpecialValue/]
+								[if (v.quantity <> null)]																[comment OPEN checks if the quantity is not null/]
+									[if (sv.specialType=SpecialType::MISSING)]											[comment OPEN checks if the SpecialValue is MISSING/]
+missing_values_[vr.valueRangeDef.name/]=None
+										[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks if the quantity is an AbsoluteValue/]
+											[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the variable to be an AbsoluteValue/]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment OPEN assigns the variable to be an AbsoluteValue/]
+										[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks if the quantity is a Percent/]
+											[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the variable to be a Percent/]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the variable to be a Percent/]
+										[/if]																			[comment CLOSE checks if the quantity is an AbsoluteValue or a Percent/]
+									[elseif (sv.specialType=SpecialType::INVALID)]										[comment OPEN checks if the SpecialValue is INVALID/]
+invalid_values_[vr.valueRangeDef.name/]=None
+										[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks if the quantity is an AbsoluteValue/]
+											[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the variable to be an AbsoluteValue/]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the variable to be an AbsoluteValue/]
+										[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks if the quantity is a Percent/]
+											[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the variable to be a Percent/]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the variable to be a Percent/]
+										[/if]																			[comment CLOSE checks if the quantity is an AbsoluteValue or a Percent/]
+									[elseif (sv.specialType=SpecialType::OUTLIER)]										[comment OPEN checks if the SpecialValue is OUTLIER/]
+										[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks if the quantity is an AbsoluteValue/]
+											[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the variable to be an AbsoluteValue/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the variable to be an AbsoluteValue/]
+										[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks if the quantity is a Percent/]
+											[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the variable to be a Percent/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the variable to be a Percent/]
+										[/if]																			[comment CLOSE checks if the quantity is an AbsoluteValue or a Percent/]
+									[/if]																				[comment CLOSE checks if the SpecialValue is MISSING, INVALID o OUTLIER/]
+								[elseif (v.quantity = null)]															[comment OPEN checks if the quantity is null/]
+									[if (sv.specialType=SpecialType::MISSING)]											[comment OPEN checks if the SpecialType is MISSING/]
+missing_values_[vr.valueRangeDef.name/]=None
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[elseif (sv.specialType=SpecialType::INVALID)]										[comment OPEN checks if the SpecialType is INVALID/]
+invalid_values_[vr.valueRangeDef.name/]=None
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[elseif (sv.specialType=SpecialType::OUTLIER)]										[comment OPEN checks if the SpecialType is OUTLIER/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_in.dataDictionaryDefinition.name/], field=None, 
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[/if]
+								[/if]																					[comment CLOSE checks if the quantity is null/]
+							[/let]																						[comment CLOSE assigns the variable to be a SpecialValue/]
+						[/if]																							[comment CLOSE checks if the parameter is a SpecialValue/]
+					[/for]																								[comment CLOSE traverse all the parameters/]
+				[/for]																									[comment CLOSE traverse all the input DataDictionaries/]
+			[elseif (aContract.type=ContractType::POSTCONDITION)]														[comment OPEN checks if it is a Postcondition/]
+				[for (dd_out : Workflow::DataDictionary | aContract.eContainer(Workflow::DataProcessing).outputPort)]	[comment OPEN traverse all the output DataDictionaries/]
+					[for (v : Value | vr.value)]																		[comment OPEN traverse all the value parameters/]
+						[if (v.oclIsTypeOf(FixValue))]																	[comment OPEN checks if the parameter is a FixValue/]
+							[let fv : FixValue = v.oclAsType(FixValue)]													[comment OPEN assigns the parameter to be a FixValue/]
+								[if (v.quantity <> null)]																[comment OPEN checks if the quantity is not null/]
+									[if(v.quantity.oclIsTypeOf(AbsoluteValue))]											[comment OPEN checks if the quantity is an AbsoluteValue/]
+										[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]					[comment OPEN assigns the parameter to be an AbsoluteValue/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[dd_out.dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field=None,
+								quant_abs=[av.value/], quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																			[comment CLOSE assigns the parameter to be an AbsoluteValue/]
+									[elseif (v.quantity.oclIsTypeOf(Percent))]											[comment OPEN checks if the parameter is a Percent/]
+										[let per : Percent = v.quantity.oclAsType(Percent)]								[comment OPEN assigns the parameter to be a Percent/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[dd_out.dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field=None,
+								quant_rel=[per.percent/], quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if])):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+										[/let]																			[comment CLOSE assigns the parameter to be a Percent/]
+									[/if]																				[comment CLOSE checks if the parameter is a Percent/]
+								[else]																					[comment OPEN checks if the quantity is null/]
+if contract_pre_post.check_fix_value_range([if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]value='[fv.value/]'[else]value=[fv.value/][/if], data_dictionary=[dd_out.dataDictionaryDefinition.name/], belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field=None,
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+								[/if]																					[comment CLOSE checks if the quantity is null/]
+							[/let]																						[comment CLOSE assigns the parameter to be a FixValue/]
+						[elseif (v.oclIsTypeOf(Interval))]																[comment OPEN checks if the parameter is an Interval/]
+							[let inter : Interval = v.oclAsType(Interval)]												[comment OPEN assigns the parameter to be an Interval/]
+if contract_pre_post.check_interval_range_float(left_margin=[inter.leftMargin/], right_margin=[inter.rightMargin/], data_dictionary=[dd_out.dataDictionaryDefinition.name/],
+                               closure_type=Closure([if (inter.closureType=ClosureType::openOpen)]0[elseif (inter.closureType=ClosureType::openClosed)]1[elseif (inter.closureType=ClosureType::closedOpen)]2[elseif (inter.closureType=ClosureType::closedClosed)]3[/if]), belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+							[/let]																						[comment CLOSE assigns the parameter to be an Interval/]
+						[elseif (v.oclIsTypeOf(SpecialValue))]															[comment OPEN checks if the parameter is a SpecialValue/]
+							[let sv : SpecialValue = v.oclAsType(SpecialValue)]											[comment OPEN assigns the parameter to be a SpecialValue/]
+								[if (v.quantity <> null)]																[comment OPEN checks if the quantity is not null/]
+									[if (sv.specialType=SpecialType::MISSING)]											[comment OPEN checks if the SpecialValue is MISSING/]
+missing_values_[vr.valueRangeDef.name/]=None
+										[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks if the quantity is an AbsoluteValue/]
+											[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the parameter to be an AbsoluteValue/]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the parameter to be an AbsoluteValue/]
+										[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks if the quantity is a Percent/]
+											[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the parameter to be a Percent/]
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the parameter to be a Percent/]
+										[/if]																			[comment CLOSE checks if the quantity is an AbsoluteValue or a Percent/]
+									[elseif (sv.specialType=SpecialType::INVALID)]										[comment OPEN checks if the SpecialValue is INVALID/]
+invalid_values_[vr.valueRangeDef.name/]=None
+										[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks if the quantity is an AbsoluteValue/]
+											[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the parameter to be an AbsoluteValue/]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the parameter to be an AbsoluteValue/]
+										[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks if the quantity is a Percent/]
+											[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the parameter to be a Percent/]
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the parameter to be a Percent/]
+										[/if]																			[comment CLOSE checks if the quantity is a Percent/]
+									[elseif (sv.specialType=SpecialType::OUTLIER)]										[comment OPEN checks if the SpecialValue is OUTLIER/]
+										[if(v.quantity.oclIsTypeOf(AbsoluteValue))]										[comment OPEN checks if the quantity is an AbsoluteValue/]
+											[let av : AbsoluteValue = v.quantity.oclAsType(AbsoluteValue)]				[comment OPEN assigns the parameter to be an AbsoluteValue/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_abs=[av.value/]):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the parameter to be an AbsoluteValue/]
+										[elseif (v.quantity.oclIsTypeOf(Percent))]										[comment OPEN checks if the quantity is a Percent/]
+											[let per : Percent = v.quantity.oclAsType(Percent)]							[comment OPEN assigns the parameter to be a Percent/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								quant_op=Operator([if(v.quantity.operator=Operator::greatherEqual)]0[elseif(v.quantity.operator=Operator::greather)]1[elseif(v.quantity.operator=Operator::lessEqual)]2[elseif(v.quantity.operator=Operator::less)]3[elseif(v.quantity.operator=Operator::equal)]4[/if]), quant_rel=[per.percent/]/100):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+											[/let]																		[comment CLOSE assigns the parameter to be a Percent/]
+										[/if]																			[comment CLOSE checks if the quantity is an AbsolteValue or a Percent/]
+									[/if]																				[comment CLOSE checks if the SpecialValue is MISSING, INVALID or OUTLIER/]
+								[elseif (v.quantity = null)]															[comment OPEN checks if the quantity is null/]
+									[if (sv.specialType=SpecialType::MISSING)]											[comment OPEN checks if the SpecialValue is MISSING/]
+missing_values_[vr.valueRangeDef.name/]=None
+if contract_pre_post.check_missing_range(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								missing_values=missing_values_[vr.valueRangeDef.name/],
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[elseif (sv.specialType=SpecialType::INVALID)]										[comment OPEN checks if the SpecialValue is INVALID/]
+invalid_values_[vr.valueRangeDef.name/]=None
+if contract_pre_post.check_invalid_values(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								invalid_values=invalid_values_[vr.valueRangeDef.name/],
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[elseif (sv.specialType=SpecialType::OUTLIER)]										[comment OPEN checks if the SpecialValue is OUTLIER/]
+if contract_pre_post.check_outliers(belong_op=Belong([if (vr.belongOp=BelongOp::BELONG)]0[else]1[/if]), data_dictionary=[dd_out.dataDictionaryDefinition.name/], field=None, 
+								quant_abs=None, quant_rel=None, quant_op=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[/if]																				[comment CLOSE checks if the SpecialValue is MISSING, INVALID or OUTLIER/]
+								[/if]																					[comment CLOSE checks if the quantity is null or not/]
+							[/let]																						[comment CLOSE assigns the parameter to be a SpecialValue/]
+						[/if]																							[comment CLOSE checks if the parameter is a FixValue, Interval or SpecialValue/]
+					[/for]																								[comment CLOSE traverse all the value parameters/]
+				[/for]																									[comment CLOSE traverse all the output DataDictionaries/]
+			[/if]																										[comment CLOSE checks if it is a Precondition or a Postcondition/]
+		[/let]																											[comment CLOSE assigns the contract to be a ValueRange/]
+	[elseif (aContract.oclIsTypeOf(Condition))]																			[comment OPEN Contracts of type Condition (Invariants)/]
+[generateCallConditionContract(aContract)/]
+	[/if]																												[comment CLOSE Contracts of type FieldRange, ValueRange or Condition (Invariants)/]
+[/let]																													[comment CLOSE assigns the input in the contract to be of type DataDictionary/]
+[/template]
+
+
+[template public generateCallConditionContract(aContract : Contract)]
+[let cond : Condition = aContract.oclAsType(Condition)]																												[comment OPEN assigns the contract to be of type Condition (Invariants)/]
+	[let df : DataField = cond._in.oclAsType(DataField)]																											[comment OPEN assigns the variable to be of type DataField/]
+		[let firstIf : If = cond._if->first()]																														[comment OPEN assigns the variable to be the first If/]
+			[if (firstIf.belongOp=BelongOp::BELONG)]																												[comment OPEN checks that belongOp_in is BELONG/]
+[comment]The code below generates the call to invariants of type FixValue-FixValue[/comment]
+				[if (firstIf.valueCondition->first().oclIsTypeOf(FixValue))]																						[comment OPEN checks that the type of the value is FixValue/]
+					[let fv : FixValue = firstIf.valueCondition->first().oclAsType(FixValue)]																		[comment OPEN assigns the variable to be of type FixValue/]
+						[if (firstIf._then.valueResult.oclIsTypeOf(FixValue))]																						[comment OPEN checks that the variable is of type FixValue/]
+							[let fvt : FixValue = firstIf._then.valueResult.oclAsType(FixValue)]																	[comment OPEN assigns the variable to be of type FixValue/]
+								[if (aContract.out.oclIsTypeOf(DataDictionary))]																					[comment OPEN checks that the variable is of type DataDictionary/]
+									[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]															[comment OPEN assigns the variable to be of type DataDictionary/]
+
+input_values_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][let fval : FixValue = value.oclAsType(FixValue)][if (fval.dataType=DataType::String or fval.dataType=DataType::Time or fval.dataType=DataType::DateTime)]'[fval.value/]'[else][fval.value/][/if][/let][/if][/for][/for][']'/]
+output_values_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][if (if_cond_list._then.valueResult.oclIsTypeOf(FixValue))][let fval : FixValue = if_cond_list._then.valueResult.oclAsType(FixValue)][if (fval.dataType=DataType::String or fval.dataType=DataType::Time or fval.dataType=DataType::DateTime)]'[fval.value/]'[else][fval.value/][/if][/let][/if][/if][/for][/for][']'/]
+
+data_type_input_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][let fval : FixValue = value.oclAsType(FixValue)][if (fv.dataType=DataType::String)]DataType(0)[elseif (fval.dataType=DataType::Time)]DataType(1)[elseif (fval.dataType=DataType::Integer)]DataType(2)[elseif (fval.dataType=DataType::DateTime)]DataType(3)[elseif (fval.dataType=DataType::Boolean)]DataType(4)[elseif (fval.dataType=DataType::Double)]DataType(5)[elseif (fval.dataType=DataType::Float)]DataType(6)[else]None)[/if][/let][/if][/for][/for][']'/]
+data_type_output_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][if (if_cond_list._then.valueResult.oclIsTypeOf(FixValue))][let fval : FixValue = if_cond_list._then.valueResult.oclAsType(FixValue)][if (fval.dataType=DataType::String)]DataType(0)[elseif (fval.dataType=DataType::Time)]DataType(1)[elseif (fval.dataType=DataType::Integer)]DataType(2)[elseif (fval.dataType=DataType::DateTime)]DataType(3)[elseif (fval.dataType=DataType::Boolean)]DataType(4)[elseif (fval.dataType=DataType::Double)]DataType(5)[elseif (fval.dataType=DataType::Float)]DataType(6)[else]None)[/if][/let][/if][/if][/for][/for][']'/]
+
+if contract_invariants.check_inv_fix_value_fix_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										input_values_list=input_values_list_[cond.conditionDef.name/], 
+										output_values_list=output_values_list_[cond.conditionDef.name/],
+										belong_op_in=Belong([if (firstIf.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (firstIf._then.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										data_type_input_list=data_type_input_list_[cond.conditionDef.name/],
+										data_type_output_list=data_type_output_list_[cond.conditionDef.name/],
+										field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[/let]																															[comment CLOSE assigns the variable to be of type DataDictionary/]
+								[elseif (aContract.out.oclIsTypeOf(DataField))]																						[comment OPEN checks that the variable is of type DataField/]
+									[let df_out : DataField = aContract.out.oclAsType(DataField)]																	[comment OPEN assigns the variable to be of type DataField/]
+
+input_values_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][let fval : FixValue = value.oclAsType(FixValue)][if (fval.dataType=DataType::String or fval.dataType=DataType::Time or fval.dataType=DataType::DateTime)]'[fval.value/]'[else][fval.value/][/if][/let][/if][/for][/for][']'/]
+output_values_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][if (if_cond_list._then.valueResult.oclIsTypeOf(FixValue))][let fval : FixValue = if_cond_list._then.valueResult.oclAsType(FixValue)][if (fval.dataType=DataType::String or fval.dataType=DataType::Time or fval.dataType=DataType::DateTime)]'[fval.value/]'[else][fval.value/][/if][/let][/if][/if][/for][/for][']'/]
+
+data_type_input_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][let fval : FixValue = value.oclAsType(FixValue)][if (fv.dataType=DataType::String)]DataType(0)[elseif (fval.dataType=DataType::Time)]DataType(1)[elseif (fval.dataType=DataType::Integer)]DataType(2)[elseif (fval.dataType=DataType::DateTime)]DataType(3)[elseif (fval.dataType=DataType::Boolean)]DataType(4)[elseif (fval.dataType=DataType::Double)]DataType(5)[elseif (fval.dataType=DataType::Float)]DataType(6)[else]None)[/if][/let][/if][/for][/for][']'/]
+data_type_output_list_[cond.conditionDef.name/]=['['/][for (if_cond_list : If | cond._if) separator(', ')][for (value : Value | if_cond_list.valueCondition) separator(', ')][if (value.oclIsTypeOf(FixValue))][if (if_cond_list._then.valueResult.oclIsTypeOf(FixValue))][let fval : FixValue = if_cond_list._then.valueResult.oclAsType(FixValue)][if (fval.dataType=DataType::String)]DataType(0)[elseif (fval.dataType=DataType::Time)]DataType(1)[elseif (fval.dataType=DataType::Integer)]DataType(2)[elseif (fval.dataType=DataType::DateTime)]DataType(3)[elseif (fval.dataType=DataType::Boolean)]DataType(4)[elseif (fval.dataType=DataType::Double)]DataType(5)[elseif (fval.dataType=DataType::Float)]DataType(6)[else]None)[/if][/let][/if][/if][/for][/for][']'/]
+
+if contract_invariants.check_inv_fix_value_fix_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										input_values_list=input_values_list_[cond.conditionDef.name/], 
+										output_values_list=output_values_list_[cond.conditionDef.name/],
+										belong_op_in=Belong([if (firstIf.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (firstIf._then.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										data_type_input_list=data_type_input_list_[cond.conditionDef.name/],
+										data_type_output_list=data_type_output_list_[cond.conditionDef.name/],
+										field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+									[/let]																															[comment CLOSE assigns the variable to be of type DataField/]
+								[/if]																																[comment CLOSE checks that the variable is of type DataDictionary or DataField/]
+							[/let]																																	[comment CLOSE assigns the variable to be of type FixValue/]
+						[/if]																																		[comment CLOSE checks that the variable is of type FixValue/]
+					[/let]																																			[comment CLOSE assigns the variable to be of type FixValue/]
+				[/if]																																				[comment CLOSE checks that the type of the value is FixValue/]
+			[/if]																																					[comment CLOSE checks that belongOp_in is BELONG/]
+		[/let]																																						[comment CLOSE assigns the variable to be the first If/]
+	[/let]																																							[comment CLOSE assigns the variable to be of type DataField/]
+	[for (if_cond : If | cond._if)]																																	[comment OPEN traverse all the If class in the contract/]
+		[if (if_cond.belongOp=BelongOp::NOTBELONG)]																													[comment OPEN checks that belongOp_in is NOTBELONG/]
+			[let df : DataField = cond._in.oclAsType(DataField)]																									[comment OPEN assigns the variable to be of type DataField/]
+				[let th : Then = if_cond._then.oclAsType(Then)]																										[comment OPEN assigns the variable to be of type Then/]
+					[if (cond._in.oclIsTypeOf(DataField))]																											[comment OPEN checks that the input is a DataField/]
+						[let df_out : DataField = aContract.out.oclAsType(DataField)]																				[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_missing_value_missing_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]), field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+						[/let]																																		[comment CLOSE assigns the variable to be of type DataField/]
+					[elseif (cond._in.oclIsTypeOf(DataDictionary))]																									[comment OPEN checks that the input is a DataDictionary/]
+						[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]																		[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_missing_value_missing_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]), field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+						[/let]																																		[comment CLOSE assigns the variable to be of type DataDictionary/]
+					[/if]																																			[comment CLOSE checks that the input is a DataField or a DataDictionary/]
+				[/let]																																				[comment CLOSE assigns the variable to be of type Then/]
+			[/let]																																					[comment CLOSE assigns the variable to be of type DataField/]
+		[/if]																																						[comment CLOSE checks that belongOp_in is NOTBELONG/]
+		[if (if_cond.belongOp=BelongOp::BELONG)]																													[comment OPEN checks that belongOp_in is BELONG/]
+			[if (cond._in.oclIsTypeOf(DataField))]																													[comment OPEN checks that the input is a DataField/]
+				[let df : DataField = cond._in.oclAsType(DataField)]																								[comment OPEN assigns the variable to be of type DataField/]
+					[let th : Then = if_cond._then.oclAsType(Then)]																									[comment OPEN assigns the variable to be of type Then/]
+						[for (v : Value | if_cond.valueCondition)]																									[comment OPEN traverse all the values associated to the contract/]
+							[if (v.oclIsTypeOf(FixValue))]																											[comment OPEN checks that the type of the value is FixValue/]
+								[let fv : FixValue = v.oclAsType(FixValue)]																							[comment OPEN assigns the variable to be of type FixValue/]
+[comment]The code below generates the call to invariants of type FixValue-DerivedValue[/comment]
+									[if (th.valueResult.oclIsTypeOf(DerivedValue))]																					[comment OPEN checks that the variable is of type DerivedValue/]
+										[let derVal : DerivedValue = th.valueResult.oclAsType(DerivedValue)]														[comment OPEN assigns the variable to be of type DerivedValue/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the variable is of type DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_fix_value_derived_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										fix_value_input=[if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]'[fv.value/]'[else][fv.value/][/if],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										derived_type_output=DerivedType([if (derVal.type=DerivedType::MostFrequent)]0[elseif (derVal.type=DerivedType::Previous)]1[elseif (derVal.type=DerivedType::Next)]2[/if]),
+										axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the variable is of type DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_fix_value_derived_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										fix_value_input=[if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]'[fv.value/]'[else][fv.value/][/if],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										derived_type_output=DerivedType([if (derVal.type=DerivedType::MostFrequent)]0[elseif (derVal.type=DerivedType::Previous)]1[elseif (derVal.type=DerivedType::Next)]2[/if]),
+										axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the variable is of type DataDictionary or DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type DerivedValue/]
+									[/if]																															[comment CLOSE checks that the variable is of type DerivedValue/]
+[comment]The code below generates the call to invariants of type FixValue-NumOp[/comment]
+									[if (th.valueResult.oclIsTypeOf(NumOp))]																						[comment OPEN checks that the variable is of type NumOp/]
+										[let nop : NumOp = th.valueResult.oclAsType(NumOp)]																			[comment OPEN assigns the variable to be of type NumOp/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the variable is of type DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_fix_value_num_op(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										fix_value_input=[if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]'[fv.value/]'[else][fv.value/][/if],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										num_op_output=Operation([if (nop.operation=Operation::Interpolation)]0[elseif (nop.operation=Operation::Mean)]1[elseif (nop.operation=Operation::Median)]2[elseif (nop.operation=Operation::Closest)]3[/if]),
+										axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the variable is of type DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_fix_value_num_op(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										fix_value_input=[if (fv.dataType=DataType::String or fv.dataType=DataType::Time or fv.dataType=DataType::DateTime)]'[fv.value/]'[else][fv.value/][/if],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										num_op_output=Operation([if (nop.operation=Operation::Interpolation)]0[elseif (nop.operation=Operation::Mean)]1[elseif (nop.operation=Operation::Median)]2[elseif (nop.operation=Operation::Closest)]3[/if]),
+										axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the variable is of type DataDictionary or DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type NumOp/]
+									[/if]																															[comment CLOSE checks that the variable is of type NumOp/]
+								[/let]																																[comment CLOSE assigns the variable to be of type FixValue/]
+							[/if]																																	[comment CLOSE checks that the type of the value is FixValue/]
+							[if (v.oclIsTypeOf(Interval))]																											[comment OPEN checks that the type of the value is Interval/]
+								[let int : Interval = v.oclAsType(Interval)]																						[comment OPEN assigns the variable to be of type Interval/]
+[comment]The code below generates the call to invariants of type Interval-FixValue[/comment]
+									[if (th.valueResult.oclIsTypeOf(FixValue))]																						[comment OPEN checks that the variable is of type FixValue/]
+										[let fvt : FixValue = th.valueResult.oclAsType(FixValue)]																	[comment OPEN assigns the variable to be of type FixValue/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the variable is of type DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_interval_fix_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										left_margin=[int.leftMargin/], right_margin=[int.rightMargin/],
+										closure_type=Closure([if (int.closureType=ClosureType::openOpen)]0[elseif (int.closureType=ClosureType::openClosed)]1[elseif (int.closureType=ClosureType::closedOpen)]2[elseif (int.closureType=ClosureType::closedClosed)]3[/if]),
+										fix_value_output=[if (fvt.dataType=DataType::String or fvt.dataType=DataType::Time or fvt.dataType=DataType::DateTime)]'[fvt.value/]'[else][fvt.value/][/if], belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]), belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										data_type_output=[if (fvt.dataType=DataType::String)]DataType(0)[elseif (fvt.dataType=DataType::Time)]DataType(1)[elseif (fvt.dataType=DataType::Integer)]DataType(2)[elseif (fvt.dataType=DataType::DateTime)]DataType(3)[elseif (fvt.dataType=DataType::Boolean)]DataType(4)[elseif (fvt.dataType=DataType::Double)]DataType(5)[elseif (fvt.dataType=DataType::Float)]DataType(6)[else]None)[/if],
+										field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the variable is of type DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_interval_fix_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										left_margin=[int.leftMargin/], right_margin=[int.rightMargin/],
+										closure_type=Closure([if (int.closureType=ClosureType::openOpen)]0[elseif (int.closureType=ClosureType::openClosed)]1[elseif (int.closureType=ClosureType::closedOpen)]2[elseif (int.closureType=ClosureType::closedClosed)]3[/if]),
+										fix_value_output=[if (fvt.dataType=DataType::String or fvt.dataType=DataType::Time or fvt.dataType=DataType::DateTime)]'[fvt.value/]'[else][fvt.value/][/if],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]), belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										data_type_output=[if (fvt.dataType=DataType::String)]DataType(0)[elseif (fvt.dataType=DataType::Time)]DataType(1)[elseif (fvt.dataType=DataType::Integer)]DataType(2)[elseif (fvt.dataType=DataType::DateTime)]DataType(3)[elseif (fvt.dataType=DataType::Boolean)]DataType(4)[elseif (fvt.dataType=DataType::Double)]DataType(5)[elseif (fvt.dataType=DataType::Float)]DataType(6)[else]None)[/if],
+										field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the output is DataDictionary or DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type FixValue/]
+									[/if]																															[comment CLOSE checks that the variable is of type FixValue/]
+[comment]The code below generates the call to invariants of type Interval-DerivedValue[/comment]
+									[if (th.valueResult.oclIsTypeOf(DerivedValue))]																					[comment OPEN checks that the variable is of type DerivedValue/]
+										[let derVal : DerivedValue = th.valueResult.oclAsType(DerivedValue)]														[comment OPEN assigns the variable to be of type DerivedValue/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the variable is of type DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_interval_derived_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										left_margin=[int.leftMargin/], right_margin=[int.rightMargin/],
+										closure_type=Closure([if (int.closureType=ClosureType::openOpen)]0[elseif (int.closureType=ClosureType::openClosed)]1[elseif (int.closureType=ClosureType::closedOpen)]2[elseif (int.closureType=ClosureType::closedClosed)]3[/if]),
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]), belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										derived_type_output=DerivedType([if (derVal.type=DerivedType::MostFrequent)]0[elseif (derVal.type=DerivedType::Previous)]1[elseif (derVal.type=DerivedType::Next)]2[/if]),
+										axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the variable is of type DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_interval_derived_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										left_margin=[int.leftMargin/], right_margin=[int.rightMargin/],
+										closure_type=Closure([if (int.closureType=ClosureType::openOpen)]0[elseif (int.closureType=ClosureType::openClosed)]1[elseif (int.closureType=ClosureType::closedOpen)]2[elseif (int.closureType=ClosureType::closedClosed)]3[/if]),
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]), belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										derived_type_output=DerivedType([if (derVal.type=DerivedType::MostFrequent)]0[elseif (derVal.type=DerivedType::Previous)]1[elseif (derVal.type=DerivedType::Next)]2[/if]),
+										axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the output is DataDictionary or DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type DerivedValue/]
+									[/if]																															[comment CLOSE checks that the variable is of type derivedValue/]
+[comment]The code below generates the call to invariants of type Interval-NumOp[/comment]
+									[if (th.valueResult.oclIsTypeOf(NumOp))]																						[comment OPEN checks that the variable is of type NumOp/]
+										[let nop : NumOp = th.valueResult.oclAsType(NumOp)]																			[comment OPEN assigns the variable to be of type NumOp/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the variable is of type DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_interval_num_op(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										left_margin=[int.leftMargin/], right_margin=[int.rightMargin/],
+										closure_type=Closure([if (int.closureType=ClosureType::openOpen)]0[elseif (int.closureType=ClosureType::openClosed)]1[elseif (int.closureType=ClosureType::closedOpen)]2[elseif (int.closureType=ClosureType::closedClosed)]3[/if]),
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]), belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										num_op_output=Operation([if (nop.operation=Operation::Interpolation)]0[elseif (nop.operation=Operation::Mean)]1[elseif (nop.operation=Operation::Median)]2[elseif (nop.operation=Operation::Closest)]3[/if]),
+										axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the variable is of type DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_interval_num_op(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										left_margin=[int.leftMargin/], right_margin=[int.rightMargin/],
+										closure_type=Closure([if (int.closureType=ClosureType::openOpen)]0[elseif (int.closureType=ClosureType::openClosed)]1[elseif (int.closureType=ClosureType::closedOpen)]2[elseif (int.closureType=ClosureType::closedClosed)]3[/if]),
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]), belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										num_op_output=Operation([if (nop.operation=Operation::Interpolation)]0[elseif (nop.operation=Operation::Mean)]1[elseif (nop.operation=Operation::Median)]2[elseif (nop.operation=Operation::Closest)]3[/if]),
+										axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the output is DataDictionary or DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type NumOp/]
+									[/if]																															[comment CLOSE checks that the variable is of type NumOp/]
+								[/let]																																[comment CLOSE assigns the variable to be of type Interval/]
+							[/if]																																	[comment CLOSE checks that the type of the value is Interval/]
+							[if (v.oclIsTypeOf(SpecialValue))]																										[comment OPEN checks that the type of the value is SpecialValue/]
+								[let sv : SpecialValue = v.oclAsType(SpecialValue)]																					[comment OPEN assigns the variable to be of type SpecialValue/]
+[comment]The code below generates the call to invariants of type SpecialValue-FixValue[/comment]
+									[if (th.valueResult.oclIsTypeOf(FixValue))]																						[comment OPEN checks that the type of the result is FixValue/]
+										[let fixVal : FixValue = th.valueResult.oclAsType(FixValue)]																[comment OPEN assigns the variable to be of type FixValue/]
+											[if (sv.specialType=SpecialType::MISSING and aContract._in.oclIsTypeOf(DataField))]										[comment OPEN checks that SpecialType is MISSING/]
+missing_values_[cond.conditionDef.name/]=['['/][let dfa : DataField = aContract._in.oclAsType(DataField)][for (mv : ValueField | dfa.dataField.missingValues) separator(', ')][mv.value/][/for][/let][']'/]
+											[elseif (sv.specialType=SpecialType::INVALID and aContract._in.oclIsTypeOf(DataField))]									[comment OPEN checks that SpecialType is INVALID/]
+invalid_values_[cond.conditionDef.name/]=['['/][let dfa : DataField = aContract._in.oclAsType(DataField)][for (mv : ValueField | dfa.dataField.invalidValues) separator(', ')][mv.value/][/for][/let][']'/]
+											[/if]																													[comment CLOSE checks that SpecialType is MISSING or INVALID/]
+											[if (sv.specialType=SpecialType::MISSING and aContract._in.oclIsTypeOf(DataDictionary))]								[comment OPEN checks that SpecialType is MISSING/]
+missing_values_[cond.conditionDef.name/]=['['/][let dd_in : DataDictionary = aContract._in.oclAsType(DataDictionary)][for (dfa : Workflow::DataField | dd_in.dataDictionary.datafield) separator(', ')][for (mv : ValueField | dfa.missingValues) separator(', ')][mv.value/][/for][']'/][/for][/let]
+											[elseif (sv.specialType=SpecialType::INVALID and aContract._in.oclIsTypeOf(DataDictionary))]							[comment OPEN checks that SpecialType is INVALID/]
+invalid_[cond.conditionDef.name/]=['['/][let dd_in : DataDictionary = aContract._in.oclAsType(DataDictionary)][for (dfa : Workflow::DataField | dd_in.dataDictionary.datafield) separator(', ')][for (mv : ValueField | dfa.invalidValues) separator(', ')][mv.value/][/for][']'/][/for][/let]
+										[/if]																														[comment CLOSE checks that SpecialType is MISSING or INVALID/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the output is a DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_special_value_fix_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							data_dictionary_out=[dd_out.dataDictionary.name/],
+							special_type_input=SpecialType([if (sv.specialType=SpecialType::MISSING)]0[elseif (sv.specialType=SpecialType::INVALID)]1[elseif (sv.specialType=SpecialType::OUTLIER)]2[/if]),
+							fix_value_output=[if (fixVal.dataType=DataType::String or fixVal.dataType=DataType::Time or fixVal.dataType=DataType::DateTime)]'[fixVal.value/]'[else][fixVal.value/][/if],
+							belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							data_type_output=[if (fixVal.dataType=DataType::String)]DataType(0)[elseif (fixVal.dataType=DataType::Time)]DataType(1)[elseif (fixVal.dataType=DataType::Integer)]DataType(2)[elseif (fixVal.dataType=DataType::DateTime)]DataType(3)[elseif (fixVal.dataType=DataType::Boolean)]DataType(4)[elseif (fixVal.dataType=DataType::Double)]DataType(5)[elseif (fixVal.dataType=DataType::Float)]DataType(6)[else]None)[/if],
+							missing_values=[if (sv.specialType=SpecialType::MISSING)]missing_values_[cond.conditionDef.name/][elseif (sv.specialType=SpecialType::INVALID)]invalid_values_[cond.conditionDef.name/][else]None[/if], 
+							axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif(aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the output is a DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_special_value_fix_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							special_type_input=SpecialType([if (sv.specialType=SpecialType::MISSING)]0[elseif (sv.specialType=SpecialType::INVALID)]1[elseif (sv.specialType=SpecialType::OUTLIER)]2[/if]),
+							fix_value_output=[if (fixVal.dataType=DataType::String or fixVal.dataType=DataType::Time or fixVal.dataType=DataType::DateTime)]'[fixVal.value/]'[else][fixVal.value/][/if],
+							belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							data_type_output=[if (fixVal.dataType=DataType::String)]DataType(0)[elseif (fixVal.dataType=DataType::Time)]DataType(1)[elseif (fixVal.dataType=DataType::Integer)]DataType(2)[elseif (fixVal.dataType=DataType::DateTime)]DataType(3)[elseif (fixVal.dataType=DataType::Boolean)]DataType(4)[elseif (fixVal.dataType=DataType::Double)]DataType(5)[elseif (fixVal.dataType=DataType::Float)]DataType(6)[else]None)[/if],
+							missing_values=[if (sv.specialType=SpecialType::MISSING)]missing_values_[cond.conditionDef.name/][elseif (sv.specialType=SpecialType::INVALID)]invalid_values_[cond.conditionDef.name/][else]None[/if], 
+							axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the output is a DataDictionary or a DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type FixValue/]
+									[/if]																															[comment CLOSE checks that the type of the result is FixValue/]
+[comment]The code below generates the call to invariants of type SpecialValue-DerivedValue[/comment]
+									[if (th.valueResult.oclIsTypeOf(DerivedValue))]																					[comment OPEN checks that the type of the result is DerivedValue/]
+										[let derVal : DerivedValue = th.valueResult.oclAsType(DerivedValue)]														[comment OPEN assigns the variable to be of type DerivedValue/]
+											[if (sv.specialType=SpecialType::MISSING and aContract._in.oclIsTypeOf(DataField))]										[comment OPEN checks that SpecialType is MISSING/]
+missing_values_[cond.conditionDef.name/]=['['/][let dfa : DataField = aContract._in.oclAsType(DataField)][for (mv : ValueField | dfa.dataField.missingValues) separator(', ')][mv.value/][/for][/let][']'/]
+											[elseif (sv.specialType=SpecialType::INVALID and aContract._in.oclIsTypeOf(DataField))]									[comment OPEN checks that SpecialType is INVALID/]
+invalid_values_[cond.conditionDef.name/]=['['/][let dfa : DataField = aContract._in.oclAsType(DataField)][for (mv : ValueField | dfa.dataField.invalidValues) separator(', ')][mv.value/][/for][/let][']'/]
+											[/if]																													[comment CLOSE checks that SpecialType is MISSING or INVALID/]
+											[if (sv.specialType=SpecialType::MISSING and aContract._in.oclIsTypeOf(DataDictionary))]								[comment OPEN checks that SpecialType is MISSING/]
+missing_values_[cond.conditionDef.name/]=['['/][let dd_in : DataDictionary = aContract._in.oclAsType(DataDictionary)][for (dfa : Workflow::DataField | dd_in.dataDictionary.datafield) separator(', ')][for (mv : ValueField | dfa.missingValues) separator(', ')][mv.value/][/for][']'/][/for][/let]
+											[elseif (sv.specialType=SpecialType::INVALID and aContract._in.oclIsTypeOf(DataDictionary))]							[comment OPEN checks that SpecialType is INVALID/]
+invalid_[cond.conditionDef.name/]=['['/][let dd_in : DataDictionary = aContract._in.oclAsType(DataDictionary)][for (dfa : Workflow::DataField | dd_in.dataDictionary.datafield) separator(', ')][for (mv : ValueField | dfa.invalidValues) separator(', ')][mv.value/][/for][']'/][/for][/let]
+											[/if]																													[comment CLOSE checks that SpecialType is MISSING or INVALID/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the output is a DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_special_value_derived_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							data_dictionary_out=[dd_out.dataDictionary.name/],
+							belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							special_type_input=SpecialType([if (sv.specialType=SpecialType::MISSING)]0[elseif (sv.specialType=SpecialType::INVALID)]1[elseif (sv.specialType=SpecialType::OUTLIER)]2[/if]),
+							derived_type_output=DerivedType([if (derVal.type=DerivedType::MostFrequent)]0[elseif (derVal.type=DerivedType::Previous)]1[elseif (derVal.type=DerivedType::Next)]2[/if]),
+							missing_values=[if (sv.specialType=SpecialType::MISSING)]missing_values_[cond.conditionDef.name/][elseif (sv.specialType=SpecialType::INVALID)]invalid_values_[cond.conditionDef.name/][else]None[/if], axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the output is a DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_special_value_derived_value(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+							belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+							special_type_input=SpecialType([if (sv.specialType=SpecialType::MISSING)]0[elseif (sv.specialType=SpecialType::INVALID)]1[elseif (sv.specialType=SpecialType::OUTLIER)]2[/if]),
+							derived_type_output=DerivedType([if (derVal.type=DerivedType::MostFrequent)]0[elseif (derVal.type=DerivedType::Previous)]1[elseif (derVal.type=DerivedType::Next)]2[/if]),
+							missing_values=[if (sv.specialType=SpecialType::MISSING)]missing_values_[cond.conditionDef.name/][elseif (sv.specialType=SpecialType::INVALID)]invalid_values_[cond.conditionDef.name/][else]None[/if], axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df.dataField.out.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the output is a DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type DerivedValue/]
+									[/if]																															[comment CLOSE checks that the type of the result is DerivedValue/]
+[comment]The code below generates the call to invariants of type SpecialValue-NumOp[/comment]
+									[if (th.valueResult.oclIsTypeOf(NumOp))]																						[comment OPEN checks that the type of the result is NumOp/]
+										[let nop : NumOp = th.valueResult.oclAsType(NumOp)]																			[comment OPEN assigns the variable to be of type NumOp/]
+											[if (sv.specialType=SpecialType::MISSING and aContract._in.oclIsTypeOf(DataField))]										[comment OPEN checks that SpecialType is MISSING/]
+missing_values_[cond.conditionDef.name/]=['['/][let dfa : DataField = aContract._in.oclAsType(DataField)][for (mv : ValueField | dfa.dataField.missingValues) separator(', ')][mv.value/][/for][/let][']'/]
+											[elseif (sv.specialType=SpecialType::INVALID and aContract._in.oclIsTypeOf(DataField))]									[comment OPEN checks that SpecialType is INVALID/]
+invalid_values_[cond.conditionDef.name/]=['['/][let dfa : DataField = aContract._in.oclAsType(DataField)][for (mv : ValueField | dfa.dataField.invalidValues) separator(', ')][mv.value/][/for][/let][']'/]
+											[/if]																													[comment CLOSE checks that SpecialType is MISSING or INVALID/]
+											[if (sv.specialType=SpecialType::MISSING and aContract._in.oclIsTypeOf(DataDictionary))]								[comment OPEN checks that SpecialType is MISSING/]
+missing_values_[cond.conditionDef.name/]=['['/][let dd_in : DataDictionary = aContract._in.oclAsType(DataDictionary)][for (dfa : Workflow::DataField | dd_in.dataDictionary.datafield) separator(', ')][for (mv : ValueField | dfa.missingValues) separator(', ')][mv.value/][/for][']'/][/for][/let]
+											[elseif (sv.specialType=SpecialType::INVALID and aContract._in.oclIsTypeOf(DataDictionary))]							[comment OPEN checks that SpecialType is INVALID/]
+invalid_[cond.conditionDef.name/]=['['/][let dd_in : DataDictionary = aContract._in.oclAsType(DataDictionary)][for (dfa : Workflow::DataField | dd_in.dataDictionary.datafield) separator(', ')][for (mv : ValueField | dfa.invalidValues) separator(', ')][mv.value/][/for][']'/][/for][/let]
+											[/if]																													[comment CLOSE checks that SpecialType is MISSING or INVALID/]
+											[if (aContract.out.oclIsTypeOf(DataDictionary))]																		[comment OPEN checks that the output is a DataDictionary/]
+												[let dd_out : DataDictionary = aContract.out.oclAsType(DataDictionary)]												[comment OPEN assigns the variable to be of type DataDictionary/]
+if contract_invariants.check_inv_special_value_num_op(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[dd_out.dataDictionary.name/],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										special_type_input=SpecialType([if (sv.specialType=SpecialType::MISSING)]0[elseif (sv.specialType=SpecialType::INVALID)]1[elseif (sv.specialType=SpecialType::OUTLIER)]2[/if]),
+										num_op_output=Operation([if (nop.operation=Operation::Interpolation)]0[elseif (nop.operation=Operation::Mean)]1[elseif (nop.operation=Operation::Median)]2[elseif (nop.operation=Operation::Closest)]3[/if]),
+										missing_values=[if (sv.specialType=SpecialType::MISSING)]missing_values_[cond.conditionDef.name/][elseif (sv.specialType=SpecialType::INVALID)]invalid_values_[cond.conditionDef.name/][else]None[/if], axis_param=0, field_in=None, field_out=None):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataDictionary/]
+											[elseif (aContract.out.oclIsTypeOf(DataField))]																			[comment OPEN checks that the output is a DataField/]
+												[let df_out : DataField = aContract.out.oclAsType(DataField)]														[comment OPEN assigns the variable to be of type DataField/]
+if contract_invariants.check_inv_special_value_num_op(data_dictionary_in=[df.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										data_dictionary_out=[df_out.dataField.eContainer(Workflow::DataDictionary).dataDictionaryDefinition.name/],
+										belong_op_in=Belong([if (if_cond.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										belong_op_out=Belong([if (th.belongOp=BelongOp::BELONG)]0[else]1[/if]),
+										special_type_input=SpecialType([if (sv.specialType=SpecialType::MISSING)]0[elseif (sv.specialType=SpecialType::INVALID)]1[elseif (sv.specialType=SpecialType::OUTLIER)]2[/if]),
+										num_op_output=Operation([if (nop.operation=Operation::Interpolation)]0[elseif (nop.operation=Operation::Mean)]1[elseif (nop.operation=Operation::Median)]2[elseif (nop.operation=Operation::Closest)]3[/if]),
+										missing_values=[if (sv.specialType=SpecialType::MISSING)]missing_values_[cond.conditionDef.name/][elseif (sv.specialType=SpecialType::INVALID)]invalid_values_[cond.conditionDef.name/][else]None[/if], axis_param=0, field_in='[df.dataField.displayName/]', field_out='[df_out.dataField.displayName/]'):
+	print('[aContract.type/] [aContract.name/] VALIDATED')
+else:
+	print('[aContract.type/] [aContract.name/] NOT VALIDATED')
+												[/let]																												[comment CLOSE assigns the variable to be of type DataField/]
+											[/if]																													[comment CLOSE checks that the output is a DataDictionary or a DataField/]
+										[/let]																														[comment CLOSE assigns the variable to be of type NumOp/]
+									[/if]																															[comment CLOSE checks that the type of the result is NumOp/]
+								[/let]																																[comment CLOSE assigns the variable to be of type SpecialValue/]
+							[/if]																																	[comment CLOSE checks that the type of the value is FixValue or SpecialValue (if at the beginning)/]
+						[/for]																																		[comment CLOSE traverse all the values associated to the contract/]
+					[/let]																																			[comment CLOSE assigns the variable to be of type Then/]
+				[/let]																																				[comment CLOSE assigns the variable to be of type DataField/]
+			[/if]																																					[comment CLOSE checks that the input is a DataField/]
+		[/if]																																						[comment CLOSE checks that belongOp_in is BELONG/]
+	[/for]																																							[comment CLOSE traverse all the If class in the contract/]
+[/let]																																								[comment CLOSE  assigns the contract to be of type Condition (Invariants)/]
+[/template]
+
+

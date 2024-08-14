@@ -1,0 +1,53 @@
+[comment encoding = UTF-8 /]
+[**
+ * The documentation of the module generate.
+ */]
+[module generate('https://www.example.org/contractDef')]
+
+
+[**
+ * The documentation of the template generateElement.
+ * @param aLibrary
+ */]
+
+[template public generateContractDef(aContractDefinition : ContractDefinition)]
+
+[/template]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Library" nsURI="http://www.example.org/Library" nsPrefix="Library">
+  <eClassifiers xsi:type="ecore:EClass" name="Library">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataprocessingdefinition"
+        upperBound="-1" eType="#//DataProcessingDefinition" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataProcessingDefinition" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameterdefinition" upperBound="-1"
+        eType="#//ParameterDefinition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contractdefinition" upperBound="-1"
+        eType="#//ContractDefinition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="inputPort" lowerBound="1"
+        upperBound="-1" eType="#//DataDictionaryDefinition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outputPort" lowerBound="1"
+        upperBound="-1" eType="#//DataDictionaryDefinition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="in" lowerBound="1" upperBound="-1"
+        eType="#//ArgumentDefinition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="out" lowerBound="1" upperBound="-1"
+        eType="#//ArgumentDefinition"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Job" eSuperTypes="#//DataProcessingDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="workflow" lowerBound="1"
+        eType="ecore:EClass Workflow.ecore#//Workflow"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Transformation" eSuperTypes="#//DataProcessingDefinition"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ParameterDefinition" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="required" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dataType" eType="#//DataType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DataType">
+    <eLiterals name="String"/>
+    <eLiterals name="Time" value="1"/>
+    <eLiterals name="Integer" value="2"/>
+    <eLiterals name="DateTime" value="3"/>
+    <eLiterals name="Boolean" value="4"/>
+    <eLiterals name="Double" value="5"/>
+    <eLiterals name="Float" value="6"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MapDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//Map"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CastTypeDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//CastType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PrimitiveDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//Primitive"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DerivedFieldDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//DerivedField"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FilterValueDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//FilterValue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="matchingvaluedef" upperBound="-1"
+        eType="#//MatchingValueDef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="primitivedef" upperBound="-1"
+        eType="#//PrimitiveDef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MatchingValueDef" abstract="true" eSuperTypes="#//ParameterDefinition"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RangeDef" eSuperTypes="#//MatchingValueDef">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Contract.ecore#//Range"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MissingValuesDef" eSuperTypes="#//MatchingValueDef">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//SpecialValues"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DiscretizeBinDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//DiscretizeBin"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ImputeTypeDef" abstract="true" eSuperTypes="#//ParameterDefinition"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ContractDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//Contract"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contractDefinition" lowerBound="1"
+        eType="ecore:EClass ContractDef.ecore#//ContractDefinition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ArgumentDefinition" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DataDictionaryDefinition" eSuperTypes="#//ArgumentDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//DataDictionary"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datafielddefinition" upperBound="-1"
+        eType="#//DataFieldDefinition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataFieldDefinition" abstract="true"
+      eSuperTypes="#//ArgumentDefinition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CategoricalDef" eSuperTypes="#//DataFieldDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//Categorical"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ContinuousDef" eSuperTypes="#//DataFieldDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//Continuous"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DerivedValueDef" eSuperTypes="#//ImputeTypeDef">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//DerivedValue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NumOpDef" eSuperTypes="#//ImputeTypeDef">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//NumOp"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FixValueDef" eSuperTypes="#//ImputeTypeDef">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//FixValue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FieldDef" eSuperTypes="#//ParameterDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="boundTo" eType="ecore:EClass Workflow.ecore#//Field"/>
+  </eClassifiers>
+</ecore:EPackage>

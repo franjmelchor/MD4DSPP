@@ -1,0 +1,56 @@
+[comment encoding = UTF-8 /]
+[**
+ * The documentation of the module generate.
+ */]
+[module generate('http://www.example.org/Library')]
+
+[**
+ * The documentation of the template generateElement.
+ * @param aLibrary
+ */]
+
+[template public generateLibrary(aLibrary : Library)]
+[comment @main/]
+
+[/template]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

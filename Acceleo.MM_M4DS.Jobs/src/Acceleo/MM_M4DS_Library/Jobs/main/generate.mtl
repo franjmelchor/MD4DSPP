@@ -1,0 +1,91 @@
+[comment encoding = UTF-8 /]
+[**
+ * The documentation of the module generate.
+ */]
+[module generate('http://www.example.org/Library')]
+
+
+[import Acceleo::MM_M4DS_Workflow::Jobs::main::generate/]
+
+[**
+ * The documentation of the template generateElement.
+ * @param aLibrary
+ */]
+
+[template public generateLibrary(aLibrary : Library)]
+[comment @main/]
+
+[for (dp : DataProcessingDefinition | aLibrary.dataprocessingdefinition)]
+	[if (dp.oclIsKindOf(Job))]
+		[let job : Job = dp.oclAsType(Job)]
+[generateWorkflow(job.workflow)/]
+[file (job.workflow.name+'.py', false, 'UTF-8')]
+print('----------------------INPUT DATA DICTIONARIES----------------------')
+			[for (ddd : DataDictionaryDefinition | dp.inputPort)]
+dataDictionary='[ddd.boundTo.path/]'
+
+print('---------------------------------------')
+
+[ddd.boundTo.dataDictionaryDefinition.name/]=pd.read_csv(dataDictionary, sep='[ddd.boundTo.columnDelimiter/]')
+
+print('_______________________________________')
+
+			[/for]
+print('----------------------OUTPUT DATA DICTIONARIES----------------------')
+			[for (ddd : DataDictionaryDefinition | dp.outputPort)]
+print('[ddd.name/]')
+
+print('---------------------------------------')
+
+print('[ddd.boundTo.name/]')
+print('[ddd.boundTo.path/]')
+
+print('_______________________________________')
+
+			[/for]
+[/file]
+		[/let]
+	[/if]
+[/for]
+[/template]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
